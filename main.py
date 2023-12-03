@@ -34,9 +34,9 @@ response = requests.get(url, headers=headers)
 if response.status_code == 200:
     response_data = json.loads(response.content)
     current_timestamp = response_data['timestamp']
-    # new_url = url+f'changeStartDate={last_update_time}%2B01:00&changeEndDate={current_timestamp}%2B01:00'
-    # response = requests.get(new_url, headers = headers)
-    response = requests.get('https://services.nvd.nist.gov/rest/json/cvehistory/2.0/?changeStartDate=2023-12-02T16:20:26.103%2B01:00&changeEndDate=2023-12-03T16:31:10.490%2B01:00', headers=headers)
+    new_url = url+f'changeStartDate={last_update_time}%2B01:00&changeEndDate={current_timestamp}%2B01:00'
+    response = requests.get(new_url, headers = headers)
+    # response = requests.get('https://services.nvd.nist.gov/rest/json/cvehistory/2.0/?changeStartDate=2023-12-02T16:20:26.103%2B01:00&changeEndDate=2023-12-03T16:31:10.490%2B01:00', headers=headers)
     # print(new_url)
     changed_cves = []
     if response.status_code==200:
@@ -50,25 +50,25 @@ if response.status_code == 200:
 print(changed_cves)
 
 update_url = 'https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={}'
-# for cve in changed_cves:
-# 	new_url = update_url.format(cve)
-# 	response = requests.get(new_url, headers = headers)
-# 	if response.status_code==200:
-# 		year = cve.split('-')[1]
-# 		print('Success')
-# 		response_data = json.loads(response.content)
-# 		# Reading the JSON data from a gzip file
-# 		with gzip.open(f'cves/{year}', 'rt', encoding='UTF-8') as gzip_file:
-# 		    json_data = gzip_file.read()
-# 		    # Parse the JSON data
-# 		    data = json.loads(json_data)
-# 		data[cve] = response_data['vulnerabilities'][0]['cve']
-# 		with gzip.open(f'cves/{year}', 'wt', encoding='UTF-8') as gzip_file:
-# 		    gzip_file.write(json.dumps(data))
+for cve in changed_cves:
+	new_url = update_url.format(cve)
+	response = requests.get(new_url, headers = headers)
+	if response.status_code==200:
+		year = cve.split('-')[1]
+		print('Success')
+		response_data = json.loads(response.content)
+		# Reading the JSON data from a gzip file
+		with gzip.open(f'cves/{year}', 'rt', encoding='UTF-8') as gzip_file:
+		    json_data = gzip_file.read()
+		    # Parse the JSON data
+		    data = json.loads(json_data)
+		data[cve] = response_data['vulnerabilities'][0]['cve']
+		with gzip.open(f'cves/{year}', 'wt', encoding='UTF-8') as gzip_file:
+		    gzip_file.write(json.dumps(data))
 
-# 	else:
-# 		print(f'Error:{response.content}')
-# 	time.sleep(6)
+	else:
+		print(f'Error:{response.content}')
+	time.sleep(6)
 message = f'Updated {len(changed_cves)} CVEs. Here is the list:{changed_cves}'
 send_notification(message)
 
