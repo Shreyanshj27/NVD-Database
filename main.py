@@ -69,6 +69,8 @@ for cve in changed_cves:
 	else:
 		print(f'Error:{response.content}')
 	time.sleep(6)
+with open('last_run_info.txt','w') as f:
+	f.write(current_timestamp)
 message = f'Updated {len(changed_cves)} CVEs. Here is the list:{changed_cves}'
 send_notification(message)
 
